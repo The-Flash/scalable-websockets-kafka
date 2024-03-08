@@ -1,0 +1,76 @@
+name: scalable-websockets-kafka
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    hostname: zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    volumes:
+      - zookeeper_logs:/var/lib/zookeeper/log
+      - zookeeper_data:/var/lib/zookeeper/data
+  kafka1:
+    image: confluentinc/cp-kafka:latest
+    hostname: kafka1
+    ports:
+      - "9092:9092"
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 3
+      KAFKA_LISTENERS: HOST_LISTENER://0.0.0.0:9092, INT_LISTENER://0.0.0.0:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: HOST_LISTENER:PLAINTEXT, INT_LISTENER:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: HOST_LISTENER://localhost:9092, INT_LISTENER://kafka1:29092
+      KAFKA_INTER_BROKER_LISTENER_NAME: INT_LISTENER
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+    volumes:
+      - kafka1_data:/var/lib/kafka/data
+ 
+  kafka2:
+      image: confluentinc/cp-kafka:latest
+      hostname: kafka2
+      ports:
+        - "9093:9092"
+      depends_on:
+        - zookeeper
+      environment:
+        KAFKA_BROKER_ID: 2
+        KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+        KAFKA_DEFAULT_REPLICATION_FACTOR: 3
+        KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+        KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: HOST_LISTENER:PLAINTEXT, INT_LISTENER:PLAINTEXT
+        KAFKA_LISTENERS: HOST_LISTENER://0.0.0.0:9092, INT_LISTENER://0.0.0.0:29092
+        KAFKA_INTER_BROKER_LISTENER_NAME: INT_LISTENER
+        KAFKA_ADVERTISED_LISTENERS: HOST_LISTENER://localhost:9093, INT_LISTENER://kafka2:29092
+      volumes:
+        - kafka2_data:/var/lib/kafka/data
+ 
+  kafka3:
+      image: confluentinc/cp-kafka:latest
+      hostname: kafka2
+      ports:
+        - "9094:9092"
+      depends_on:
+        - zookeeper
+      environment:
+        KAFKA_BROKER_ID: 3
+        KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+        KAFKA_DEFAULT_REPLICATION_FACTOR: 3
+        KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+        KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: HOST_LISTENER:PLAINTEXT, INT_LISTENER:PLAINTEXT
+        KAFKA_LISTENERS: HOST_LISTENER://0.0.0.0:9092, INT_LISTENER://0.0.0.0:29092
+        KAFKA_INTER_BROKER_LISTENER_NAME: INT_LISTENER
+        KAFKA_ADVERTISED_LISTENERS: HOST_LISTENER://localhost:9094, INT_LISTENER://kafka3:29092
+      volumes:
+        - kafka3_data:/var/lib/kafka/data
+          
+volumes:
+  kafka1_data:
+  kafka2_data:
+  kafka3_data:
+  zookeeper_logs:
+  zookeeper_data:
